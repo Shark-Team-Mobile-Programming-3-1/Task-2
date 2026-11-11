@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Add specific suppressions here when needed. 
+         For example:
+         <issue id="UseRequireInsteadOfGet" severity="ignore">
+             <ignore path="src/main/java/com/example/task2/MySpecificFile.java" />
+         </issue>
+    -->
+</lint>

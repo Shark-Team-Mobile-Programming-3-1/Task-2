@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Pull the latest code from your Git repository
+                checkout scm
+            }
+        }
+
+        stage('Make gradlew executable') {
+            steps {
+                // Required on Linux servers to avoid "Permission denied"
+                sh 'chmod +x gradlew'
+            }
+        }
+
+        stage('Run Android Lint') {
+            steps {
+                // Run Lint on the debug variant.
+                // 'abortOnError = false' in build.gradle.kts ensures Gradle
+                // finishes successfully so Jenkins can read the report.
+                sh './gradlew lintDebug'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Use Warnings Next Generation plugin to parse Android Lint results
+            recordIssues(
+                enabledForFailure: true,
+                tools: [androidLintParser(pattern: 'app/build/reports/lint-results-debug.xml')]
+            )
+            
+            // Archive the HTML report so you can download it from Jenkins
+            archiveArtifacts artifacts: 'app/build/reports/lint-results-debug.html', allowEmptyArchive: true
+        }
+    }
+}
