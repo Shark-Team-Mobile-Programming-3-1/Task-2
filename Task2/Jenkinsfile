@@ -9,19 +9,11 @@ pipeline {
             }
         }
 
-        stage('Make gradlew executable') {
-            steps {
-                // Required on Linux servers to avoid "Permission denied"
-                sh 'chmod +x gradlew'
-            }
-        }
-
         stage('Run Android Lint') {
             steps {
-                // Run Lint on the debug variant.
-                // 'abortOnError = false' in build.gradle.kts ensures Gradle
-                // finishes successfully so Jenkins can read the report.
-                sh './gradlew lintDebug'
+                // Use 'bat' on Windows instead of 'sh'
+                // No need for chmod; gradlew.bat is already executable
+                bat 'gradlew.bat lintDebug'
             }
         }
     }
@@ -29,13 +21,14 @@ pipeline {
     post {
         always {
             // Use Warnings Next Generation plugin to parse Android Lint results
+            // Make sure the path includes 'Task2/' since your project is in a subdirectory
             recordIssues(
                 enabledForFailure: true,
-                tools: [androidLintParser(pattern: 'app/build/reports/lint-results-debug.xml')]
+                tools: [androidLintParser(pattern: 'Task2/app/build/reports/lint-results-debug.xml')]
             )
             
             // Archive the HTML report so you can download it from Jenkins
-            archiveArtifacts artifacts: 'app/build/reports/lint-results-debug.html', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'Task2/app/build/reports/lint-results-debug.html', allowEmptyArchive: true
         }
     }
 }
