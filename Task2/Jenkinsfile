@@ -4,30 +4,27 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Pull the latest code from your Git repository
                 checkout scm
             }
         }
 
         stage('Run Android Lint') {
             steps {
-                // Use 'bat' on Windows instead of 'sh'
-                // No need for chmod; gradlew.bat is already executable
-                bat 'gradlew.bat lintDebug'
+                // Se déplacer dans le sous-dossier Task2 avant d'exécuter Gradle
+                dir('Task2') {
+                    bat 'gradlew.bat lintDebug'
+                }
             }
         }
     }
 
     post {
         always {
-            // Use Warnings Next Generation plugin to parse Android Lint results
-            // Make sure the path includes 'Task2/' since your project is in a subdirectory
             recordIssues(
                 enabledForFailure: true,
+                // Le chemin du rapport reste relatif à la racine du workspace
                 tools: [androidLintParser(pattern: 'Task2/app/build/reports/lint-results-debug.xml')]
             )
-            
-            // Archive the HTML report so you can download it from Jenkins
             archiveArtifacts artifacts: 'Task2/app/build/reports/lint-results-debug.html', allowEmptyArchive: true
         }
     }
